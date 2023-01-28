@@ -1,0 +1,12 @@
+.idea
+venv
+local_settings.py
+__pycache__/
+*/--pycache__/
+*.py[cod]
+.pyc
+.git
+tasks.txt
+media
+static
+bookcrossing-vue
