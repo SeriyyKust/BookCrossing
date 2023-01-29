@@ -15,6 +15,9 @@ class RoomChat(models.Model):
         verbose_name = "Комната чата"
         verbose_name_plural = "Комнаты чатов"
 
+    def __str__(self):
+        return f"{self.creator.username}-{self.companion.username}"
+
 
 class Chat(models.Model):
     """
@@ -28,3 +31,6 @@ class Chat(models.Model):
     class Meta:
         verbose_name = "Сообщение чата"
         verbose_name_plural = "Сообщения чатов"
+
+    def __str__(self):
+        return f"{self.user}: {self.text}"[:16]
