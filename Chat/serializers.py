@@ -22,7 +22,7 @@ class RoomChatGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoomChat
-        fields = ("creator", "companion", "date")
+        fields = ("id", "creator", "companion", "date")
 
 
 class RoomChatPostSerializer(serializers.ModelSerializer):

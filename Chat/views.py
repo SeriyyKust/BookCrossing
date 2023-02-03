@@ -37,7 +37,6 @@ class DialogView(APIView):
 
     def get(self, request):
         room = RoomChat.objects.get(pk=request.GET.get("room"))
-        print(room)
         if request.user == room.creator or request.user == room.companion:
             chat = Chat.objects.filter(room=room)
             serializer = ChatGetSerializer(chat, many=True)
