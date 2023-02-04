@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'Chat.apps.ChatConfig',
+    'Profile.apps.ProfileConfig',
 ]
 
 MIDDLEWARE = [
@@ -113,7 +114,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework_json_api.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
+        'rest_framework.parsers.MultiPartParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework_json_api.renderers.JSONRenderer',
