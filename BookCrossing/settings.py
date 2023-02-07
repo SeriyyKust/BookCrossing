@@ -22,6 +22,7 @@ INSTALLED_APPS = [
 
     'Chat.apps.ChatConfig',
     'Profile.apps.ProfileConfig',
+    'Book.apps.BookConfig',
 ]
 
 MIDDLEWARE = [
