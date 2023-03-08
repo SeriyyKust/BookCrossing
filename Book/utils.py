@@ -61,7 +61,7 @@ class BookManager(Manager):
         :param request:
         :return: context (The dictionary contains information about the serialized data and the status.)
         """
-        return BookManager.create_new_objects_from_serializer(request, BookSerializer(request.data))
+        return BookManager.create_new_objects_from_serializer(request, BookSerializer(data=request.POST))
 
 
 class PhotoManager(Manager):
@@ -82,4 +82,5 @@ class PhotoManager(Manager):
         :param request:
         :return: context (The dictionary contains information about the serialized data and the status.)
         """
-        return PhotoManager.create_new_objects_from_serializer(request, PhotoBookSerializer(request.data))
+        print(request.FILES)
+        return PhotoManager.create_new_objects_from_serializer(request, PhotoBookSerializer(data=request.data))

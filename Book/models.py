@@ -29,9 +29,8 @@ class Book(models.Model):
     description = models.CharField(max_length=9192, null=True, blank=True, verbose_name="Описание")
     author = models.CharField(max_length=1024, verbose_name="Автор")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
-    state = models.ForeignKey(StateCategory, on_delete=models.PROTECT, null=True, blank=True,
-                              verbose_name="Состояние книги")
-    genre = models.ForeignKey(Genre, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Жанр")
+    state = models.ForeignKey(StateCategory, on_delete=models.PROTECT, verbose_name="Состояние книги")
+    genre = models.ForeignKey(Genre, on_delete=models.PROTECT, verbose_name="Жанр")
 
     class Meta:
         verbose_name = "Книга"
