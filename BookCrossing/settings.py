@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'corsheaders',
+    'drf_yasg',
 
     'Chat.apps.ChatConfig',
     'Profile.apps.ProfileConfig',

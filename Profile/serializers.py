@@ -3,7 +3,7 @@ from .models import Profile
 from django.contrib.auth.models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     """
     Сериализация информации о пользователе
     """
@@ -17,7 +17,7 @@ class ProfileGetSerializer(serializers.ModelSerializer):
     Сериализация допольнительной информации о пользователе
     """
 
-    user = UserSerializer(required=True)
+    user = CustomUserSerializer(required=True)
 
     class Meta:
         model = Profile
