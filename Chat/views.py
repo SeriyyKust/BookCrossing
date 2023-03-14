@@ -1,57 +1,50 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import RoomChat, Chat
-from .serializers import RoomChatGetSerializer, RoomChatPostSerializer, ChatGetSerializer, ChatPostSerializer
-from rest_framework import status
+from rest_framework.generics import ListCreateAPIView, DestroyAPIView
+from .models import RoomChat, Message
+from .serializers import RoomChatGetSerializer, RoomChatPostSerializer, MessagePostSerializer, MessageGetSerializer
 from rest_framework import permissions
 from django.db.models import Q
+from .permissions import OwnerRoomPermission
+from rest_framework.response import Response
+from rest_framework import status
 
 
-class RoomChatView(APIView):
-    """
-    Комнаты чатов
-    """
-
+class RoomChatView(ListCreateAPIView, DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = RoomChatGetSerializer
 
-    def get(self, request):
-        room_chats = RoomChat.objects.filter(Q(creator=request.user) | Q(companion=request.user))
-        serializer = RoomChatGetSerializer(room_chats, many=True)
-        return Response({"rooms": serializer.data}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        return RoomChat.objects.filter(Q(creator=self.request.user) | Q(companion=self.request.user))
 
-    def post(self, request):
-        room = RoomChatPostSerializer(data={"creator": request.user.id, "companion": request.POST.get("companion_id")})
-        if room.is_valid():
-            room.save()
-            return Response({"room": room.data}, status=status.HTTP_201_CREATED)
+    def create(self, request, *args, **kwargs):
+        serializer = RoomChatPostSerializer(data=request.POST)
+        if serializer.is_valid():
+            new_companion = serializer.validated_data['companion']
+            companions = [room.companion for room in RoomChat.objects.filter(Q(creator=self.request.user))]
+            creators = [room.creator for room in RoomChat.objects.filter(Q(companion=self.request.user))]
+            if new_companion in companions or new_companion in creators:
+                return Response("This room already exists", status=status.HTTP_400_BAD_REQUEST)
+            serializer.save(creator=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(room.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DialogView(APIView):
-    """
-    Сообщения комнаты чата
-    """
+class MessageView(ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated & OwnerRoomPermission]
+    serializer_class = MessageGetSerializer
 
-    permission_classes = [permissions.IsAuthenticated, ]
+    def get_queryset(self):
+        return Message.objects.filter(room=self.request.GET.get("room"))
 
-    def get(self, request):
-        room = RoomChat.objects.get(pk=request.GET.get("room"))
-        if request.user == room.creator or request.user == room.companion:
-            chat = Chat.objects.filter(room=room)
-            serializer = ChatGetSerializer(chat, many=True)
-            return Response({"messages": serializer.data}, status=status.HTTP_200_OK)
+    def create(self, request, *args, **kwargs):
+        serializer = MessagePostSerializer(data=request.POST)
+        if serializer.is_valid():
+            room = serializer.validated_data['room']
+            rooms = [room for room in RoomChat.objects.filter(Q(creator=self.request.user) |
+                                                                 Q(companion=self.request.user))]
+            if room not in rooms:
+                return Response("The user is not a participant in this dialog.", status=status.HTTP_400_BAD_REQUEST)
+            serializer.save(user=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response({"Errors": "The user is not a member of this chat."}, status=status.HTTP_400_BAD_REQUEST)
-
-    def post(self, request):
-        room = RoomChat.objects.get(pk=request.GET.get("room"))
-        if request.user == room.creator or request.user == room.companion:
-            dialog = ChatPostSerializer(data=request.POST)
-            if dialog.is_valid():
-                dialog.save(user=request.user)
-                return Response({"message": dialog.data}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(dialog.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"Errors": "The user is not a member of this chat."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

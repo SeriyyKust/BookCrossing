@@ -24,6 +24,10 @@ class Genre(models.Model):
         return self.title[:16]
 
 
+def get_name_cover(instance, filename):
+    return "/".join(["books", str(instance.owner.username), filename])
+
+
 class Book(models.Model):
     title = models.CharField(max_length=256, verbose_name="Название")
     description = models.CharField(max_length=9192, null=True, blank=True, verbose_name="Описание")
@@ -31,6 +35,7 @@ class Book(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
     state = models.ForeignKey(StateCategory, on_delete=models.PROTECT, verbose_name="Состояние книги")
     genre = models.ForeignKey(Genre, on_delete=models.PROTECT, verbose_name="Жанр")
+    cover = models.ImageField(upload_to=get_name_cover, null=True, blank=True, verbose_name="Обложка")
 
     class Meta:
         verbose_name = "Книга"
@@ -48,6 +53,10 @@ class PhotoBook(models.Model):
     title = models.CharField(max_length=128, verbose_name="Название")
     image = models.ImageField(upload_to=get_name_image, verbose_name="Образ")
     book = models.ForeignKey(Book, on_delete=models.CASCADE, verbose_name="Книга")
+
+    @property
+    def owner(self):
+        return self.book.owner
 
     class Meta:
         verbose_name = "Фото книги"

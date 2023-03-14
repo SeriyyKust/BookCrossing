@@ -9,7 +9,7 @@ class BookViewSet(OwnerPermissionMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Get without param or Get with param: state or/and genre
-        return BookManager.get_objects(self.request.GET)
+        return BookManager.get_queryset(self.request.GET)
 
     def create(self, request, *args, **kwargs):
         context = BookManager.create_new_objects(request)
@@ -21,7 +21,7 @@ class PhotoBookViewSet(OwnerPermissionMixin, viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Get without param or Get with param: book_id
-        return PhotoManager.get_objects(self.request.GET)
+        return PhotoManager.get_queryset(self.request.GET)
 
     def create(self, request, *args, **kwargs):
         context = PhotoManager.create_new_objects(request)

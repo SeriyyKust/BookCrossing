@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from .permissions import OwnerBookPermission
+from .permissions import OwnerPermission
 from .models import Book, PhotoBook
 from .serializers import BookSerializer, PhotoBookSerializer
 from rest_framework import status
@@ -8,16 +8,17 @@ from rest_framework import status
 class OwnerPermissionMixin:
     def get_permissions(self):
         if self.action in ('update', 'partial_update', 'destroy'):
-            permission_classes = [permissions.IsAuthenticated & OwnerBookPermission]
+            permission_classes = [permissions.IsAuthenticated & OwnerPermission]
         else:
             permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
+        #return [permission() for permission in permission_classes]
+        return [permission() for permission in [OwnerPermission, ]]
 
 
 class Manager:
 
     @staticmethod
-    def create_new_objects_from_serializer(request, serializer):
+    def _create_new_objects_from_serializer(request, serializer):
         """
         Checks for validity and that the owner is correct, then creates the object.
         :param request:
@@ -42,7 +43,7 @@ class Manager:
 class BookManager(Manager):
 
     @staticmethod
-    def get_objects(param):
+    def get_queryset(param):
         objects = Book.objects.all()
         # State
         state = param.get("state", None)
@@ -61,13 +62,26 @@ class BookManager(Manager):
         :param request:
         :return: context (The dictionary contains information about the serialized data and the status.)
         """
-        return BookManager.create_new_objects_from_serializer(request, BookSerializer(data=request.POST))
+        context = {}
+        serializer = BookSerializer(data=request.POST)
+        if serializer.is_valid():
+            if serializer.validated_data['owner'] == request.user:
+                serializer.save()
+                context["data"] = serializer.data
+                context["status"] = status.HTTP_201_CREATED
+            else:
+                context["data"] = {"owner": "The owner of the book must be the sender of the create request."}
+                context["status"] = status.HTTP_400_BAD_REQUEST
+        else:
+            context["data"] = serializer.errors
+            context["status"] = status.HTTP_400_BAD_REQUEST
+        return context
 
 
 class PhotoManager(Manager):
 
     @staticmethod
-    def get_objects(param):
+    def get_queryset(param):
         objects = PhotoBook.objects.all()
         # Book
         book_id = param.get("book_id", None)
@@ -82,5 +96,18 @@ class PhotoManager(Manager):
         :param request:
         :return: context (The dictionary contains information about the serialized data and the status.)
         """
-        print(request.FILES)
-        return PhotoManager.create_new_objects_from_serializer(request, PhotoBookSerializer(data=request.data))
+        context = {}
+        serializer = PhotoBookSerializer(data=request.data)
+        if serializer.is_valid():
+            owner = serializer.validated_data['book'].owner
+            if owner == request.user:
+                serializer.save()
+                context["data"] = serializer.data
+                context["status"] = status.HTTP_201_CREATED
+            else:
+                context["data"] = {"owner": "The owner of the book must be the sender of the create request."}
+                context["status"] = status.HTTP_400_BAD_REQUEST
+        else:
+            context["data"] = serializer.errors
+            context["status"] = status.HTTP_400_BAD_REQUEST
+        return context

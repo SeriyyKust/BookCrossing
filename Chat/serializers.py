@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import RoomChat, Chat
+from .models import RoomChat, Message
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class UserRoomChatSerializer(serializers.ModelSerializer):
@@ -15,7 +16,7 @@ class UserRoomChatSerializer(serializers.ModelSerializer):
 
 class RoomChatGetSerializer(serializers.ModelSerializer):
     """
-    Сериализация комнат чата (GET)
+    (GET)
     """
     creator = UserRoomChatSerializer()
     companion = UserRoomChatSerializer()
@@ -27,27 +28,30 @@ class RoomChatGetSerializer(serializers.ModelSerializer):
 
 class RoomChatPostSerializer(serializers.ModelSerializer):
     """
-    Сериализация комнат чата (POST)
+    (POST)
     """
 
     class Meta:
         model = RoomChat
-        fields = ("creator", "companion")
+        fields = ("companion", )
 
 
-class ChatGetSerializer(serializers.ModelSerializer):
+class MessageGetSerializer(serializers.ModelSerializer):
     """
-    Сериализация сообщения чата
+    (GET)
     """
     user = UserRoomChatSerializer()
 
     class Meta:
-        model = Chat
+        model = Message
         fields = ("user", "text", "date")
 
 
-class ChatPostSerializer(serializers.ModelSerializer):
+class MessagePostSerializer(serializers.ModelSerializer):
+    """
+    (POST)
+    """
 
     class Meta:
-        model = Chat
+        model = Message
         fields = ("room", "text")

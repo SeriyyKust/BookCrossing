@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class RoomChat(models.Model):
     """
-    Модель комнаты чата
+    Chat Room Model
     """
     creator = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Создатель")
     companion = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Собеседник",
@@ -12,6 +12,7 @@ class RoomChat(models.Model):
     date = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     class Meta:
+        unique_together = ('creator', 'companion')
         verbose_name = "Комната чата"
         verbose_name_plural = "Комнаты чатов"
 
@@ -19,9 +20,9 @@ class RoomChat(models.Model):
         return f"{self.creator.username}-{self.companion.username}"
 
 
-class Chat(models.Model):
+class Message(models.Model):
     """
-    Модель сообщения чата
+    Chat message model
     """
     room = models.ForeignKey(RoomChat, on_delete=models.CASCADE, verbose_name="Комната чата")
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Пользователь")

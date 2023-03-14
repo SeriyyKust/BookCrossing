@@ -16,7 +16,7 @@ def get_all_profiles(request):
 
 class ProfileViewSet(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated, ]
-    queryset = Profile
+    queryset = Profile.objects.all()
     serializer_class = ProfileGetSerializer
 
     def get_permissions(self):

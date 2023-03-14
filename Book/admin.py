@@ -16,9 +16,9 @@ class PhotoBookAdmin(admin.ModelAdmin):
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "description", "author", "owner", "state", "genre")
+    list_display = ("id", "title", "description", "author", "owner", "state", "genre", "cover")
     list_display_links = ("id", )
-    list_editable = ("title", "description", "author", "owner", "state", "genre")
+    list_editable = ("title", "description", "author", "owner", "state", "genre", "cover")
 
 
 @admin.register(StateCategory)
